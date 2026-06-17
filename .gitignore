@@ -1,0 +1,50 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data — raw files (large, not for version control)
+data/raw/*.xls
+data/raw/*.xlsx
+data/raw/*.csv
+data/raw/*.parquet
+
+# Model artifacts (track via MLflow instead)
+models/*.pkl
+models/*.joblib
+models/*.bin
+
+# Logs & databases
+*.log
+*.db
+*.sqlite
+
+# Environment variables (secrets)
+.env
+.env.*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Reports (generated output)
+reports/figures/*.png
+reports/figures/*.html
+
+# MLflow
+mlruns/
+mlartifacts/
