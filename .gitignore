@@ -13,11 +13,13 @@ __pycache__/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Data — raw files (large, not for version control)
+# Data — not for version control (regenerate via src/data_ingestion.py)
 data/raw/*.xls
 data/raw/*.xlsx
 data/raw/*.csv
 data/raw/*.parquet
+data/processed/*.parquet
+data/processed/*.csv
 
 # Model artifacts (track via MLflow instead)
 models/*.pkl
