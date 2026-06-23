@@ -124,12 +124,14 @@ credit-risk-intelligence-platform/
 
 ## Model Performance Comparison
 
-> Results on held-out test set (20% stratified split, 6,000 rows). Updated as new models are trained.
+> Held-out test set — 20% stratified split (6,000 rows), `random_state=42`. Recall is the priority metric (False Negative costs ~10× a False Positive — see [docs/credit_risk_business_framing.md](docs/credit_risk_business_framing.md)).
 
-| Model | Accuracy | Precision | Recall | F1 | AUC-ROC | Gini | KS |
-|-------|----------|-----------|--------|----|---------|------|----|
-| Rule: PAY_0 ≥ 2 | — | — | — | — | — | — | — |
-| Logistic Regression (baseline) | — | — | — | — | — | — | — |
-| XGBoost | — | — | — | — | — | — | — |
+| Model | Features | Precision | Recall | F1 | AUC-ROC | Gini | Train (s) |
+|-------|----------|-----------|--------|----|---------|------|-----------|
+| Rule: PAY_0 ≥ 2 | Raw | — | — | — | — | — | — |
+| Logistic Regression | Raw | — | — | — | — | — | — |
+| Logistic Regression | + Engineered | — | — | — | — | — | — |
+| Random Forest | + Engineered | — | — | — | — | — | — |
+| **XGBoost** ✓ | + Engineered | — | — | — | — | — | — |
 
-*Fill in after running `notebooks/04_baseline_model.ipynb`. Recall is the priority metric — see [docs/credit_risk_business_framing.md](docs/credit_risk_business_framing.md) for cost justification.*
+*Run `notebooks/04_baseline_model.ipynb` then `notebooks/05_model_comparison.ipynb` to populate. XGBoost selected as primary model; Logistic Regression retained as regulatory challenger.*

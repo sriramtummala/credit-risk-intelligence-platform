@@ -18,7 +18,8 @@ def add_utilization_features(df: pd.DataFrame) -> pd.DataFrame:
     """How much of the credit limit is being used each month."""
     df = df.copy()
     for i, col in enumerate(BILL_COLS, start=1):
-        df[f'util_ratio_m{i}'] = df[col] / df['LIMIT_BAL'].replace(0, np.nan)
+        ratio = df[col] / df['LIMIT_BAL'].replace(0, np.nan)
+        df[f'util_ratio_m{i}'] = ratio.fillna(0.0)  # no limit → treat as 0 utilization
 
     df['util_ratio_avg'] = df[[f'util_ratio_m{i}' for i in range(1, 7)]].mean(axis=1)
     df['util_ratio_max'] = df[[f'util_ratio_m{i}' for i in range(1, 7)]].max(axis=1)
@@ -85,7 +86,7 @@ def add_trend_features(df: pd.DataFrame) -> pd.DataFrame:
     # Debt trend: positive = debt growing (bad), negative = paying down (good)
     # BILL_AMT1 = most recent, BILL_AMT6 = oldest
     df['bill_trend']      = df['BILL_AMT1'] - df['BILL_AMT6']
-    df['bill_trend_pct']  = df['bill_trend'] / df['BILL_AMT6'].replace(0, np.nan)
+    df['bill_trend_pct']  = (df['bill_trend'] / df['BILL_AMT6'].replace(0, np.nan)).fillna(0.0)  # no prior bill → 0% change
 
     # Payment trend: positive = paying more recently (good)
     df['payment_trend']   = df['PAY_AMT1'] - df['PAY_AMT6']
