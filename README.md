@@ -119,3 +119,17 @@ credit-risk-intelligence-platform/
 ├── requirements.txt
 └── README.md
 ```
+
+---
+
+## Model Performance Comparison
+
+> Results on held-out test set (20% stratified split, 6,000 rows). Updated as new models are trained.
+
+| Model | Accuracy | Precision | Recall | F1 | AUC-ROC | Gini | KS |
+|-------|----------|-----------|--------|----|---------|------|----|
+| Rule: PAY_0 ≥ 2 | — | — | — | — | — | — | — |
+| Logistic Regression (baseline) | — | — | — | — | — | — | — |
+| XGBoost | — | — | — | — | — | — | — |
+
+*Fill in after running `notebooks/04_baseline_model.ipynb`. Recall is the priority metric — see [docs/credit_risk_business_framing.md](docs/credit_risk_business_framing.md) for cost justification.*
