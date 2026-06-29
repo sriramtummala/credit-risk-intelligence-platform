@@ -8,7 +8,9 @@ Swagger UI: http://127.0.0.1:8000/docs
 ReDoc:       http://127.0.0.1:8000/redoc
 """
 import json
+import logging
 import sys
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -22,6 +24,14 @@ from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field, model_validator
 
 from src.features.engineer import engineer_features
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+)
+logger = logging.getLogger("credit_risk_api")
 
 # ── Paths & constants ─────────────────────────────────────────────────────────
 _MODEL_PATH    = PROJECT_ROOT / "models" / "champion_model.joblib"
@@ -46,15 +56,22 @@ async def lifespan(app: FastAPI):
             "Run `python main.py` from the project root to train and save the model."
         )
     _state["model"] = joblib.load(_MODEL_PATH)
+    logger.info("Model loaded from %s", _MODEL_PATH)
 
     if _METADATA_PATH.exists():
         _state["metadata"] = json.loads(_METADATA_PATH.read_text(encoding="utf-8"))
         _state["feature_cols"] = _state["metadata"].get("feature_names", [])
+        logger.info(
+            "Metadata loaded — version=%s  AUC=%.4f  git=%s",
+            _state["metadata"].get("version"),
+            _state["metadata"].get("auc_roc", 0),
+            _state["metadata"].get("git_commit"),
+        )
 
     yield  # app runs here
 
-    # Shutdown — nothing to clean up for a joblib model
     _state["model"] = None
+    logger.info("Model unloaded — service shutting down")
 
 
 app = FastAPI(
@@ -118,7 +135,7 @@ class CustomerInput(BaseModel):
     }
 
     # Demographics
-    LIMIT_BAL: float = Field(..., ge=0,      description="Credit limit (NT$)")
+    LIMIT_BAL: float = Field(..., gt=0,      description="Credit limit (NT$)")
     SEX:       int   = Field(..., ge=1, le=2, description="1=Male, 2=Female")
     EDUCATION: int   = Field(..., ge=1, le=4, description="1=Grad school, 2=University, 3=High school, 4=Other")
     MARRIAGE:  int   = Field(..., ge=1, le=3, description="1=Married, 2=Single, 3=Other")
@@ -274,9 +291,29 @@ def predict(customer: CustomerInput):
             detail="Model not loaded. Check service startup logs.",
         )
 
-    prob = _run_model(customer)
+    request_id = uuid.uuid4().hex[:8]
+    logger.info(
+        "[%s] /predict  AGE=%d  LIMIT_BAL=%.0f  PAY_0=%d  PAY_2=%d",
+        request_id, customer.AGE, customer.LIMIT_BAL, customer.PAY_0, customer.PAY_2,
+    )
+
+    try:
+        prob = _run_model(customer)
+    except Exception as exc:
+        logger.exception("[%s] Model inference failed: %s", request_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Model inference error. Contact the model owner.",
+        ) from exc
+
     band, action, detail = _band_and_action(prob)
     meta = _state["metadata"]
+
+    # Audit log — every credit decision must be traceable in a regulated environment
+    logger.info(
+        "[%s] DECISION  score=%.4f  band=%s  action=%s  model_version=%s  threshold=%.2f",
+        request_id, prob, band, action, meta.get("version", "1.0"), _THRESHOLD,
+    )
 
     return PredictionResponse(
         risk_score=round(prob, 4),
