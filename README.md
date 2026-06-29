@@ -1,5 +1,7 @@
 # Credit Risk Intelligence Platform
 
+![CI Pipeline](https://github.com/{your-github-username}/credit-risk-intelligence-platform/actions/workflows/ci.yml/badge.svg)
+
 An end-to-end ML platform for predicting credit card default probability, with explainability, GenAI/RAG governance, and production-grade monitoring — built to demonstrate readiness for quantitative risk and AI/ML roles in financial services.
 
 ---
@@ -306,6 +308,43 @@ credit-risk-intelligence-platform/
 | 8 | Containerized deployment | Docker + `entrypoint.sh`, Render-compatible |
 | 9 | Statistical validation | KS test, ROC-AUC, Gini coefficient, PSI thresholds |
 | 10 | GenAI / LLM integration | RAG assistant over risk policy docs (Days 23–27) |
+
+---
+
+## CI/CD Pipeline
+
+Every push and pull request against `main` triggers the GitHub Actions CI pipeline, which acts as a quality gate before any code reaches production.
+
+### What the pipeline checks
+
+| Step | Tool | What it validates |
+|------|------|-------------------|
+| Linting | `flake8` | No syntax errors, undefined names, or runtime-breaking issues |
+| Model training | `python main.py` | Training pipeline runs end-to-end (downloads UCI data, fits XGBoost) |
+| Tests | `pytest` | All 27 API tests pass (validation, health, predict, model-info) |
+
+### Workflow file
+
+`.github/workflows/ci.yml` runs on `ubuntu-latest` with Python 3.11:
+
+```yaml
+# Abbreviated — see the full file at .github/workflows/ci.yml
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt pytest httpx flake8
+      - run: flake8 . --select=E9,F63,F7,F82 --exclude=.venv,notebooks
+      - run: python main.py --download   # trains the model (~30 s)
+      - run: pytest tests/ -v --tb=short
+```
+
+### Interview talking point
+
+> "I implemented a CI/CD pipeline using GitHub Actions. Every push triggers linting and the full 27-test suite. The pipeline trains the model from scratch in CI — proving the end-to-end pipeline is reproducible, not just the API. A red build blocks merges, so no broken code reaches production."
 
 ---
 

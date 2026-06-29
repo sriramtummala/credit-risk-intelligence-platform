@@ -1,0 +1,72 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. Python setup ──────────────────────────────────────────────────────
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # ── 3. Cache pip packages ────────────────────────────────────────────────
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # ── 4. Install CI dependencies ───────────────────────────────────────────
+      # Install production deps + only the CI-relevant dev tools.
+      # Deliberately skip jupyter, shap, evidently, langchain etc. to keep
+      # build time under 2 minutes.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest==9.1.1 httpx==0.28.1 flake8==7.1.1
+
+      # ── 5. Lint: critical errors only ────────────────────────────────────────
+      # Selects only categories that indicate broken code (not style issues):
+      #   E9xx  — runtime errors (SyntaxError, TypeError, etc.)
+      #   F63x  — invalid assertions / print statements
+      #   F7xx  — syntax errors reported by pyflakes
+      #   F82x  — undefined names (NameError at runtime)
+      - name: Run linting (flake8 — critical errors)
+        run: |
+          flake8 . \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --exclude=.venv,notebooks,reports \
+            --show-source \
+            --statistics
+
+      # ── 6. Train the champion model ──────────────────────────────────────────
+      # Tests use TestClient(app) which triggers the FastAPI lifespan and loads
+      # the model. The model artifact is gitignored, so we train it here first.
+      # Training takes ~30 s: downloads the UCI dataset (~3 MB) then fits XGBoost.
+      - name: Train champion model
+        run: python main.py --download
+
+      # ── 7. Run test suite ────────────────────────────────────────────────────
+      - name: Run tests (pytest)
+        run: pytest tests/ -v --tb=short
