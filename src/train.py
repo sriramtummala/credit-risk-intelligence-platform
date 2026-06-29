@@ -15,6 +15,7 @@ from pathlib import Path
 
 import joblib
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 
@@ -59,8 +60,7 @@ def _git_hash() -> str:
         return "unknown"
 
 
-def _load_processed() -> "pd.DataFrame":
-    import pandas as pd
+def _load_processed() -> pd.DataFrame:
     for path in _PROCESSED_PATHS:
         if path.exists():
             logger.info("Loading processed data from %s", path)

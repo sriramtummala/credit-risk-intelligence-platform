@@ -1,8 +1,28 @@
 # Credit Risk Intelligence Platform
 
+<!-- Replace {your-github-username} with your actual GitHub handle for the live CI badge -->
 ![CI Pipeline](https://github.com/{your-github-username}/credit-risk-intelligence-platform/actions/workflows/ci.yml/badge.svg)
 
-An end-to-end ML platform for predicting credit card default probability, with explainability, GenAI/RAG governance, and production-grade monitoring — built to demonstrate readiness for quantitative risk and AI/ML roles in financial services.
+An end-to-end ML platform for predicting credit card default probability, with explainability, SR 11-7 governance, and production-grade deployment — built to demonstrate readiness for quantitative risk and AI/ML roles in financial services.
+
+### At a Glance
+
+| | |
+|---|---|
+| **Champion model** | XGBoost — AUC-ROC **0.7725**, Gini **0.5450**, Recall **80.6%** at t=0.30 |
+| **Business impact** | Threshold optimisation saves **$715K** per 6,000 applicants vs. naive baseline |
+| **Feature pipeline** | 24 raw → 51 engineered features (delinquency streaks, utilisation rates, payment trends) |
+| **API** | FastAPI service — `/predict`, `/health`, `/model-info`; Pydantic v2 validation; audit logging |
+| **Tests** | 27 pytest tests (27/27 passing); GitHub Actions CI on every push |
+| **Deployment** | Docker (`python:3.11-slim`); Render-compatible; model trains on first boot |
+| **Governance** | SR 11-7 model card, SHAP explainability, adverse action reason codes, 3-tier risk bands |
+
+```bash
+# Try it in 3 commands
+pip install -r requirements.txt
+python main.py --download          # downloads UCI data and trains XGBoost (~30 s)
+uvicorn api.main:app --port 8000   # Swagger UI at http://localhost:8000/docs
+```
 
 ---
 
@@ -355,6 +375,7 @@ This platform is built with SR 11-7 Model Risk Management in mind:
 - **[Model Card](docs/model_card.md)** — full governance document covering intended use, training data, performance metrics, monitoring triggers, ethical considerations, and a compliance checklist
 - **[Threshold Policy](docs/threshold_policy.md)** — documents the t=0.30 recommendation with cost-benefit analysis and business rationale
 - **[Explainability Summary](docs/model_explainability_summary.md)** — plain-English SHAP narrative for non-technical Risk Managers and regulators
+- **[Release Notes v1.0](docs/release_notes_v1.md)** — full changelog, known issues, deployment instructions, and v1.1 roadmap
 
 **Monitoring triggers (automatic retraining):**
 
