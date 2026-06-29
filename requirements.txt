@@ -11,6 +11,7 @@ pydantic==2.13.4
 joblib==1.5.3
 numpy==2.4.6
 pandas==2.3.3
+pyarrow>=16.0          # required by pandas for parquet read/write
 scikit-learn==1.9.0
 xgboost==3.2.0
 
