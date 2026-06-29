@@ -61,38 +61,74 @@ Build a production-grade intelligence platform that:
 
 ## Architecture
 
-```
-  [UCI Dataset]
-       │
-       ▼
-┌──────────────┐    ┌──────────────┐    ┌─────────────────────────┐
-│  Data        │───▶│  Feature     │───▶│  Model Training         │
-│  Ingestion   │    │  Engineering │    │  XGBoost (champion)     │
-│  (requests)  │    │  24→51 cols  │    │  LR + RF (challengers)  │
-└──────────────┘    └──────────────┘    └────────────┬────────────┘
-                                                     │
-                    ┌────────────────────────────────┘
-                    │
-                    ▼
-         ┌──────────────────┐    ┌─────────────────────────┐
-         │  Explainability  │    │  Threshold Optimisation  │
-         │  SHAP + Adverse  │    │  PR curve, cost matrix   │
-         │  Action Codes    │    │  Risk banding (3 tiers)  │
-         └──────────────────┘    └─────────────────────────┘
-                    │
-                    ▼
-         ┌──────────────────┐    ┌─────────────────────────┐
-         │  FastAPI Service │    │  SR 11-7 Governance      │
-         │  /predict        │    │  Model card, threshold   │
-         │  /health         │    │  policy, explainability  │
-         │  /model-info     │    │  summary                 │
-         └──────────────────┘    └─────────────────────────┘
-                    │
-                    ▼
-         ┌──────────────────┐
-         │  Docker / Render │
-         │  Cloud Deploy    │
-         └──────────────────┘
+> Key design principle: **the training pipeline and the inference service are fully decoupled.**
+> The model artifact in `models/` is the only hand-off point. Updating the model never requires changing `api/main.py`.
+
+```mermaid
+flowchart TD
+    %% ── Data source ──────────────────────────────────────────────────────────
+    UCI[("UCI Dataset\n30,000 records · 23 raw features")]
+
+    %% ── Training pipeline (offline) ──────────────────────────────────────────
+    subgraph PIPELINE ["Training Pipeline  ·  src/  ·  runs offline via main.py"]
+        direction LR
+        INGEST["data_ingestion.py\ndownload · clean · parquet"]
+        FEAT["features/engineer.py\n24 raw → 51 engineered features\npay ratios · delinquency · utilisation"]
+        TRAIN["train.py\nXGBoost champion\nscale_pos_weight=3.52"]
+        EVAL["evaluate.py\nAUC 0.7725 · Gini 0.545\nRecall 80.6% · cost $715K saved"]
+    end
+
+    %% ── Model registry ───────────────────────────────────────────────────────
+    subgraph REGISTRY ["Model Registry  ·  models/"]
+        MODEL[("champion_model.joblib")]
+        META[("champion_model_metadata.json\nversion · git_commit · all metrics\nfeature_names list")]
+    end
+
+    %% ── Inference service (online) ───────────────────────────────────────────
+    subgraph SERVING ["Inference Service  ·  api/main.py  ·  FastAPI"]
+        direction LR
+        API["Lifespan: load model + metadata\nPydantic v2 validation\naudit-trail logging per request"]
+        PRED["POST /predict\nrisk_score · risk_band · action\naction_detail · model_version"]
+        HEALTH["GET /health\nGET /model-info"]
+    end
+
+    %% ── CI/CD quality gate ───────────────────────────────────────────────────
+    subgraph CICD ["CI/CD  ·  .github/workflows/ci.yml  ·  GitHub Actions"]
+        direction LR
+        LINT["flake8\nE9 F63 F7 F82"]
+        TRUNCI["python main.py\n--download"]
+        TESTS["pytest\n27 tests"]
+    end
+
+    %% ── Governance layer ─────────────────────────────────────────────────────
+    subgraph GOV ["Governance  ·  docs/"]
+        MCARD["Model Card\nSR 11-7 aligned"]
+        TPOL["Threshold Policy\nt=0.30 documented"]
+        SHAP["SHAP Summary\nadverse action codes"]
+        RN["Release Notes\nv1.0.0-production"]
+    end
+
+    %% ── Data flow ────────────────────────────────────────────────────────────
+    UCI --> INGEST --> FEAT --> TRAIN --> EVAL
+    EVAL --> MODEL
+    EVAL --> META
+    TRAIN --> META
+
+    MODEL --> API
+    META  --> API
+    FEAT  -. "engineer_features() called at\ninference — prevents skew" .-> API
+    API   --> PRED
+    API   --> HEALTH
+
+    %% ── Governance outputs ───────────────────────────────────────────────────
+    EVAL --> MCARD
+    EVAL --> TPOL
+    EVAL --> SHAP
+    EVAL --> RN
+
+    %% ── CI/CD gate ───────────────────────────────────────────────────────────
+    LINT  --> TRUNCI --> TESTS
+    TESTS -. "must pass before\nmerge to main" .-> SERVING
 ```
 
 ---
@@ -376,6 +412,7 @@ This platform is built with SR 11-7 Model Risk Management in mind:
 - **[Threshold Policy](docs/threshold_policy.md)** — documents the t=0.30 recommendation with cost-benefit analysis and business rationale
 - **[Explainability Summary](docs/model_explainability_summary.md)** — plain-English SHAP narrative for non-technical Risk Managers and regulators
 - **[Release Notes v1.0](docs/release_notes_v1.md)** — full changelog, known issues, deployment instructions, and v1.1 roadmap
+- **[Architecture](docs/architecture.md)** — component responsibilities, design decisions, and interview talking points
 
 **Monitoring triggers (automatic retraining):**
 

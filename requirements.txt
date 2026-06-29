@@ -15,5 +15,6 @@ scikit-learn==1.9.0
 xgboost==3.2.0
 
 # Data ingestion (download + parse UCI XLS on first boot)
-openpyxl==3.1.5
+# xlrd handles old-format .xls files; openpyxl handles .xlsx only
+xlrd==2.0.2
 requests==2.34.2
