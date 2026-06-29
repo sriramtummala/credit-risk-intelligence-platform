@@ -1,0 +1,31 @@
+# Development + notebook dependencies
+# Install: pip install -r requirements.txt -r requirements-dev.txt
+
+-r requirements.txt
+
+# Testing
+pytest==9.1.1
+httpx==0.28.1
+
+# Notebooks & visualisation
+jupyter>=1.0
+jupyterlab>=4.0
+matplotlib==3.11.0
+seaborn==0.13.2
+
+# Explainability (notebooks only — not needed at inference time)
+shap==0.52.0
+
+# Monitoring
+evidently==0.7.21
+
+# GenAI / RAG (Days 23–27)
+anthropic>=0.20
+langchain>=0.1
+langchain-anthropic>=0.1
+faiss-cpu>=1.7
+pypdf>=3.0
+
+# Utilities
+python-dotenv>=1.0
+tqdm>=4.66
