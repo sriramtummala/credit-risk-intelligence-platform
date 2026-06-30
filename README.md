@@ -408,11 +408,13 @@ The pipeline trains the model from scratch in CI — proving end-to-end reproduc
 
 This platform is built with SR 11-7 Model Risk Management in mind:
 
-- **[Model Card](docs/model_card.md)** — full governance document covering intended use, training data, performance metrics, monitoring triggers, ethical considerations, and a compliance checklist
-- **[Threshold Policy](docs/threshold_policy.md)** — documents the t=0.30 recommendation with cost-benefit analysis and business rationale
+- **[Governance Pack](docs/model_governance_pack.md)** — master index: assumptions, limitations, challenger comparison, implementation controls, SR 11-7 checklist
+- **[Model Card](docs/model_card.md)** — intended use, training data, performance metrics, monitoring triggers, ethical considerations
+- **[Threshold Policy](docs/threshold_policy.md)** — t=0.30 justification with cost-benefit analysis and risk banding definitions
+- **[Monitoring Policy](docs/monitoring_policy.md)** — PSI and AUC thresholds, data quality limits, incident-response plan
 - **[Explainability Summary](docs/model_explainability_summary.md)** — plain-English SHAP narrative for non-technical Risk Managers and regulators
 - **[Release Notes v1.0](docs/release_notes_v1.md)** — full changelog, known issues, deployment instructions, and v1.1 roadmap
-- **[Architecture](docs/architecture.md)** — component responsibilities, design decisions, and interview talking points
+- **[Architecture](docs/architecture.md)** — component responsibilities and design decisions
 
 **Monitoring triggers (automatic retraining):**
 
