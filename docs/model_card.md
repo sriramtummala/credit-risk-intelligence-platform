@@ -76,14 +76,14 @@ The following uses are **not supported** by this model and require separate deve
 | Training | 24,000 (80%) | 22.1% |
 | Test (held out) | 6,000 (20%) | 22.1% (stratified) |
 
-### Data Cleaning Steps (Day 4)
+### Data Cleaning Steps
 
 1. **Undocumented category binning:** `EDUCATION` categories {0, 5, 6} and `MARRIAGE` category {0} are not described in the dataset codebook. They were binned into an "Other" category rather than dropped, preserving all 30,000 records.
 2. **Age range filter:** Retained ages 21–79; extreme outliers investigated and confirmed within plausible cardholder range.
 3. **No rows dropped for missing values:** The dataset contains no null values after source loading.
 4. **String label columns removed:** Derived label columns (`edu_label`, `mar_label`, `age_group`) were dropped before model training to prevent data leakage through categorical-to-numeric encoding.
 
-### Engineered Features (Day 9 — Selected Highlights)
+### Engineered Features
 
 | Feature | Construction | Business Rationale |
 |---------|-------------|-------------------|
@@ -158,7 +158,7 @@ SHAP (SHapley Additive exPlanations) with `TreeExplainer` — provides **mathema
 | 9 | PAY_AMT2 | 0.0957 | Higher decreases default risk |
 | 10 | PAY_AMT3 | 0.0673 | Higher decreases default risk |
 
-**Notable:** 3 of the top 5 features are engineered — confirming that feature construction (Day 9) added material predictive signal beyond raw variables.
+**Notable:** 3 of the top 5 features are engineered — confirming that feature engineering added material predictive signal beyond raw variables.
 
 ### Individual Explanations
 SHAP waterfall plots are generated per-applicant on demand. For any declined applicant, the top 3 positive SHAP values constitute the **Adverse Action reason codes** required under Regulation B. See `docs/model_explainability_summary.md` for a worked example.

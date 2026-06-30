@@ -20,7 +20,7 @@ shap==0.52.0
 # Monitoring
 evidently==0.7.21
 
-# GenAI / RAG (Days 23–27)
+# GenAI / RAG
 anthropic>=0.20
 langchain>=0.1
 langchain-anthropic>=0.1

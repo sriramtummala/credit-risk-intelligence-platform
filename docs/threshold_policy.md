@@ -108,7 +108,7 @@ The table below shows total business cost (FN losses + FP opportunity cost) at e
 
 | Date | Version | Author | Change |
 |------|---------|--------|--------|
-| 2026-06-29 | 0.1 | Credit Risk Analytics | Initial draft — Day 11 threshold optimization |
+| 2026-06-29 | 0.1 | Credit Risk Analytics | Initial draft |
 
 ---
 

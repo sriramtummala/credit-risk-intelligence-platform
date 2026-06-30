@@ -11,7 +11,7 @@ PAY_STATUS_COLS = ['PAY_0', 'PAY_2', 'PAY_3', 'PAY_4', 'PAY_5', 'PAY_6']
 
 
 # ---------------------------------------------------------------------------
-# Task 9.1 — Utilization Ratios
+# Utilization Ratios
 # ---------------------------------------------------------------------------
 
 def add_utilization_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -27,7 +27,7 @@ def add_utilization_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Task 9.2 — Payment-to-Bill Ratios
+# Payment-to-Bill Ratios
 # ---------------------------------------------------------------------------
 
 def add_payment_ratio_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -49,7 +49,7 @@ def add_payment_ratio_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Task 9.3 — Delinquency Indicators
+# Delinquency Indicators
 # ---------------------------------------------------------------------------
 
 def add_delinquency_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -76,7 +76,7 @@ def add_delinquency_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Task 9.4 — Risk Trend Features
+# Risk Trend Features
 # ---------------------------------------------------------------------------
 
 def add_trend_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -101,7 +101,7 @@ def add_trend_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Task 9.5 Risk Segment (from Day 6 policy)
+# Risk Segment
 # ---------------------------------------------------------------------------
 
 def add_risk_segment(df: pd.DataFrame) -> pd.DataFrame:
@@ -175,6 +175,6 @@ def get_feature_names() -> dict[str, str]:
         'avg_pay_amt':         'Mean payment amount across 6 months',
         'avg_unpaid_amt':      'avg_bill_amt - avg_pay_amt (floored at 0)',
         # Risk segment
-        'risk_segment':        'Rule-based segment: Low / Medium / High (from Day 6 policy)',
+        'risk_segment':        'Rule-based segment: Low / Medium / High',
         'risk_segment_id':     'Numeric encoding: Low=0, Medium=1, High=2',
     }

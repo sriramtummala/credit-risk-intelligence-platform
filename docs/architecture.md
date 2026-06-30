@@ -144,16 +144,12 @@ Every `/predict` call logs a `request_id`, the key input features, the model sco
 
 ---
 
-## Interview Talking Points
+## Design Rationale
 
-> **On modular architecture:**
-> "I designed a modular architecture that separates the training pipeline from the inference service. The model artifact in `models/` is the only interface between them. This means we can retrain the XGBoost model weekly — or swap to a neural network — without changing a single line of API code."
+**Modular architecture:** The training pipeline and inference service share only one interface — the model artifact in `models/`. This means the XGBoost model can be retrained or replaced without changing a single line of API code.
 
-> **On training/serving skew:**
-> "One of the most common production bugs in ML is training/serving skew — where the features computed at inference differ from those used in training. I prevent this by calling the same `engineer_features()` function in both `src/train.py` and `api/main.py`. There is no separate preprocessing step that could silently diverge."
+**Training/serving feature parity:** One of the most common production bugs in ML is training/serving skew. Calling the same `engineer_features()` function in both `src/train.py` and `api/main.py` eliminates any possibility of a separate preprocessing step silently diverging.
 
-> **On CI/CD:**
-> "The GitHub Actions pipeline doesn't just run unit tests — it runs the full training pipeline from a cold start. If the data download breaks, the feature engineering changes unexpectedly, or a dependency update breaks the model, CI catches it before any code reaches production."
+**CI runs the full pipeline:** The GitHub Actions pipeline doesn't just run unit tests — it runs the full training pipeline from a cold start. If the data download breaks, feature engineering changes unexpectedly, or a dependency update breaks the model, CI catches it before code reaches production.
 
-> **On the model registry:**
-> "The `champion_model_metadata.json` file is the provenance record for the deployed model. It stores the git commit hash, training date, all evaluation metrics, and the exact feature column order. The API reads this at startup and exposes it via `/model-info`, so any downstream consumer can verify which model version is live."
+**Metadata as provenance record:** `champion_model_metadata.json` stores the git commit hash, training date, all evaluation metrics, and the exact feature column order. The API reads this at startup and exposes it via `/model-info`, so any downstream consumer can verify which model version is live.

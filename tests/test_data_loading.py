@@ -1,7 +1,4 @@
-"""
-Day 2 placeholder: tests for data ingestion.
-Will be filled in on Day 3 when src/data/loader.py is built.
-"""
+"""Tests for data ingestion."""
 import pytest
 from pathlib import Path
 

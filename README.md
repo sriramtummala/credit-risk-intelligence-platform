@@ -363,7 +363,7 @@ credit-risk-intelligence-platform/
 | 7 | REST API for model serving | FastAPI + Pydantic v2, audit-trail logging, 27-test suite |
 | 8 | Containerized deployment | Docker + `entrypoint.sh`, Render-compatible |
 | 9 | Statistical validation | KS test, ROC-AUC, Gini coefficient, PSI thresholds |
-| 10 | GenAI / LLM integration | RAG assistant over risk policy docs (Days 23–27) |
+| 10 | GenAI / LLM integration | RAG assistant over risk policy docs |
 
 ---
 
@@ -398,9 +398,9 @@ jobs:
       - run: pytest tests/ -v --tb=short
 ```
 
-### Interview talking point
+### Design rationale
 
-> "I implemented a CI/CD pipeline using GitHub Actions. Every push triggers linting and the full 27-test suite. The pipeline trains the model from scratch in CI — proving the end-to-end pipeline is reproducible, not just the API. A red build blocks merges, so no broken code reaches production."
+The pipeline trains the model from scratch in CI — proving end-to-end reproducibility, not just the API. A red build blocks merges, so no broken code reaches production.
 
 ---
 
